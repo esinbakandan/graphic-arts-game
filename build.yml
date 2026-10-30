@@ -1,0 +1,57 @@
+name: Build
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - run: flutter create --platforms=android,web,windows,linux --org com.example --project-name graphic_arts_game .
+      - run: python3 tool/patch_android.py
+        env:
+          FB_APP_ID: ${{ secrets.FB_APP_ID }}
+          FB_CLIENT_TOKEN: ${{ secrets.FB_CLIENT_TOKEN }}
+      - run: flutter pub get
+      - run: flutter build apk --release
+      - run: flutter build web --release
+      - run: cd build/web && zip -r ../../web.zip .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-and-web
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            web.zip
+      - if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
+            web.zip
+  desktop:
+    continue-on-error: true   # masaüstü derlemesi başarısız olsa bile APK sonucu etkilenmez
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y ninja-build libgtk-3-dev
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - run: flutter create --platforms=windows,linux --org com.example --project-name graphic_arts_game .
+      - run: flutter pub get
+      - run: flutter build ${{ matrix.os == 'windows-latest' && 'windows' || 'linux' }} --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.os }}
+          path: build/${{ matrix.os == 'windows-latest' && 'windows/x64/runner/Release' || 'linux/x64/release/bundle' }}
