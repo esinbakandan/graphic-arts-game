@@ -1,6 +1,6 @@
 # Graphic Arts Game
 
-ATA AÖF Grafik Sanatları sınav hazırlığı: tek başına çalışma + arkadaşlarla canlı yarışma (Flutter + Firebase).
+Grafik Sanatları sınav hazırlığı: tek başına çalışma + arkadaşlarla canlı yarışma (Flutter + Firebase).
 1915 soru, 6 ders (Genel Sanat Tarihi, Temel Bilgi Teknolojileri 1, İletişime Giriş, Temel Fotoğrafçılık, Temel Tasarım 1, Yabancı Dil 1).
 GitHub Actions ile Android APK, web ve (isteğe bağlı) Windows/Linux sürümleri derlenir.
 
