@@ -1,0 +1,27 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repoyu Klonla
+        uses: actions/checkout@v4
+
+      - name: Flutter Ortamını Kur
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x' # Veya projenizin kullandığı sürüm
+          channel: 'stable'
+
+      - name: Bağımlılıkları Yükle
+        run: flutter pub get
+
+      - name: Projeyi Test Et / Derle
+        run: flutter build web --release # Eğer web projesiyse (Mobilse flutter build apk vb. yazılabilir)
